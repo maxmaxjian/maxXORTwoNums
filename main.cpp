@@ -11,37 +11,56 @@ std::ostream & operator<<(std::ostream & os, const std::bitset<N> & bset) {
   return os;
 }
 
+// solution 1
+// class solution {
+// public:
+//   int findMaximumXOR(std::vector<int> & nums) {
+//     std::copy(nums.begin(), nums.end(), std::ostream_iterator<int>(std::cout, "\t"));
+//     std::cout << std::endl;
+//     std::vector<std::bitset<6>> temp(nums.begin(), nums.end());
+//     std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::bitset<6>>(std::cout, " "));
+//     std::cout << std::endl;
+
+//     std::vector<std::bitset<32>> bins(nums.begin(), nums.end());
+//     size_t mIdx = std::distance(nums.begin(), std::max_element(nums.begin(), nums.end()));
+//     auto mBin = bins[mIdx];
+//     int first = mBin.size()-1;
+//     while (first >= 0 && mBin[first] == 0)
+//       first--;
+
+//     std::vector<int> same;
+//     same.reserve(nums.size());
+//     for (size_t i = 0; i < bins.size(); ++i) {
+//       int idx = first;
+//       while (idx >= 0 && bins[i][idx] != mBin[idx])
+// 	idx--;
+//       same.push_back(idx);
+//     }
+
+//     auto it = std::min_element(same.begin(), same.end());
+
+//     std::cout << "The two numbers found are:\n"
+// 	      << nums[std::distance(same.begin(), it)] << ", " << nums[mIdx] << std::endl;
+//     return std::bit_xor<int>()(nums[std::distance(same.begin(), it)], nums[mIdx]);
+//   }
+// };
+
 class solution {
 public:
-  int findMaximumXOR(std::vector<int> & nums) {
-    std::copy(nums.begin(), nums.end(), std::ostream_iterator<int>(std::cout, "\t"));
-    std::cout << std::endl;
-    std::vector<std::bitset<6>> temp(nums.begin(), nums.end());
-    std::copy(temp.begin(), temp.end(), std::ostream_iterator<std::bitset<6>>(std::cout, " "));
-    std::cout << std::endl;
-
-    std::vector<std::bitset<32>> bins(nums.begin(), nums.end());
-    size_t mIdx = std::distance(nums.begin(), std::max_element(nums.begin(), nums.end()));
-    auto mBin = bins[mIdx];
-    int first = mBin.size()-1;
-    while (first >= 0 && mBin[first] == 0)
-      first--;
-
-    std::vector<int> same;
-    same.reserve(nums.size());
-    for (size_t i = 0; i < bins.size(); ++i) {
-      int idx = first;
-      while (idx >= 0 && bins[i][idx] != mBin[idx])
-	idx--;
-      same.push_back(idx);
-    }
-
-    auto it = std::min_element(same.begin(), same.end());
-
-    std::cout << "The two numbers found are:\n"
-	      << nums[std::distance(same.begin(), it)] << ", " << nums[mIdx] << std::endl;
-    return std::bit_xor<int>()(nums[std::distance(same.begin(), it)], nums[mIdx]);
-  }
+   int findMaximumXOR(std::vector<int> & nums) {
+     int result;
+     if (nums.size() == 2)
+       result = std::bit_xor<int>()(nums.front(), nums.back());
+     else {
+       std::vector<int> cands;
+       std::vector<int> rest(nums.begin()+1, nums.end());
+       for (size_t i = 0; i < rest.size(); ++i)
+	 cands.push_back(std::bit_xor<int>()(nums[0], rest[i]));
+       cands.push_back(findMaximumXOR(rest));
+       result = *std::max_element(cands.begin(), cands.end());
+     }
+     return result;
+   }
 };
 
 int main() {
