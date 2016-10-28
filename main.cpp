@@ -80,20 +80,53 @@ public:
       while (bins[mx][highest] == 0)
           highest--;
 
-      std::vector<std::bitset<32>> large, small;
+      std::vector<std::bitset<32>> large;
       for (size_t i = 0; i < bins.size(); i++) {
           if (bins[i][highest] == 1)
               large.push_back(bins[i]);
-          else
-              small.push_back(bins[i]);
       }
+
+      std::vector<std::pair<std::bitset<32>, std::bitset<32>>> result;
+      for (size_t i = 0; i < large.size(); i++) {
+	size_t idx = highest-1;
+	std::vector<std::bitset<32>> vec = bins;
+	while (highest > idx && vec.size() > 1) {
+	  vec = feasibleSolns(large[i], idx, vec);
+	  idx--;
+	}
+	if (vec.size() == 1)
+	  result.push_back(std::make_pair(large[i], vec[0]));
+      }
+
+      std::vector<int> rtn;
+      for (size_t i = 0; i < result.size(); i++) {
+	rtn.push_back(std::bit_xor<int>()(result[i].first.to_ulong(), result[i].second.to_ulong()));
+	std::cout << result[i].first.to_ulong() << "," << result[i].second.to_ulong() << std::endl;
+      }
+
+      auto it = std::max_element(rtn.begin(), rtn.end());
+      // std::cout << result[std::distance(rtn.begin(), it)].first.to_ulong() << "^" << result[std::distance(rtn.begin(), it)].second.to_ulong() << std::endl;
+
+      return *it;
+  }
+
+private:
+  std::vector<std::bitset<32>> feasibleSolns(const std::bitset<32> & curr, size_t which, const std::vector<std::bitset<32>> & cands) {
+    std::vector<std::bitset<32>> result;
+    for (size_t i = 0; i < cands.size(); ++i) {
+      if (cands[i][which] != curr[which])
+	result.push_back(cands[i]);
+    }
+    if (result.empty())
+      result = cands;
+    return result;
   }
 };
 
 
 int main() {
-  std::vector<int> nums{3,10,5,25,2,8};
-  // std::vector<int> nums{1,3,2,4,6,10,9};
+  // std::vector<int> nums{3,10,5,25,2,8};
+  std::vector<int> nums{1,3,2,4,6,10,9};
   
   solution soln;
   int result = soln.findMaximumXOR(nums);
